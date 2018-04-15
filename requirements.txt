@@ -4,3 +4,4 @@ keras
 tensorflow
 scikit-learn
 pandas
+h5py
