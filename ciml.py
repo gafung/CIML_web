@@ -53,15 +53,16 @@ def a():
     ## Instantiate the model with 5 neighbors.
     knn = KNeighborsClassifier(n_neighbors=37)
     ## Fit the model on the training data.
+    res = ""
     knn.fit(X_train, y_train_5d)
-    print('KNN score of 5d:', round(knn.score(X_test, y_test_5d) * 100, 2))
+    res += 'KNN score of 5d: {}'.format(round(knn.score(X_test, y_test_5d) * 100, 2))
     knn.fit(X_train, y_train_30d)
-    print('KNN score of 30d:', round(knn.score(X_test, y_test_30d) * 100, 2))
+    res += 'KNN score of 30d: {}'.format(round(knn.score(X_test, y_test_30d) * 100, 2))
     knn.fit(X_train, y_train_90d)
-    print('KNN score of 90d:', round(knn.score(X_test, y_test_90d) * 100, 2))
-    print('KNN score of 90d (test1):', round(knn.score(X_test1, y_test_90d1) * 100, 2))
-    print('KNN score of 90d (test2):', round(knn.score(X_test2, y_test_90d2) * 100, 2))
-
+    res += 'KNN score of 90d: {}'.format(round(knn.score(X_test, y_test_90d) * 100, 2))
+    res += 'KNN score of 90d (test1): {}'.format(round(knn.score(X_test1, y_test_90d1) * 100, 2))
+    res += 'KNN score of 90d (test2): {}'.format(round(knn.score(X_test2, y_test_90d2) * 100, 2))
+    return res
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=True)
