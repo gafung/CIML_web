@@ -1,2 +1,6 @@
 Flask
 gunicorn
+keras
+tensorflow
+scikit-learn
+pandas
