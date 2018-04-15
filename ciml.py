@@ -11,7 +11,8 @@ def hello_world():
 @app.route('/nn')
 def neural_network():
     model = load_model('NeuralNetwork_5d_scale3_2HiddenLayer.h5')
-    X_test, X_train, y_test_30d, y_test_5d, y_test_90d, y_train_30d, y_train_5d, y_train_90d = get_data()
+    X_test, X_train, y_test_30d, y_test_5d, y_test_90d, y_train_30d, y_train_5d, y_train_90d = get_data(
+        negative_label_as_zero=True)
     scores = model.evaluate(X_train, y_train_5d)
     res = ""
     res += "[Train] %s: %.2f%%" % (model.metrics_names[1], scores[1] * 100)
@@ -41,7 +42,7 @@ def knn():
     return res
 
 
-def get_data():
+def get_data(negative_label_as_zero=False):
     import pandas as pd
     url = "data_v3.csv"
     insider = pd.read_csv(url, header=0)
@@ -61,6 +62,12 @@ def get_data():
                    "prev_tran_num", "hit_rate_5d", "hit_rate_30d", "hit_rate_90d"]
     for i in scaler_list:
         scaler(i)
+
+    if negative_label_as_zero:
+        insider['return_5d'] = insider['return_5d'].replace(-1, 0)
+        insider['return_30d'] = insider['return_30d'].replace(-1, 0)
+        insider['return_90d'] = insider['return_90d'].replace(-1, 0)
+
     X_train = insider[col_list][:train_num]
     y_train_5d = insider.return_5d[:train_num]
     y_train_30d = insider.return_30d[:train_num]
