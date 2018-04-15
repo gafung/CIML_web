@@ -1,1 +1,1 @@
-web: gunicorn ciml:app --log-file=
+web: gunicorn ciml:app
