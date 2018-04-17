@@ -1,48 +1,89 @@
-from flask import Flask, send_from_directory, render_template
+import numpy as np
+from flask import Flask, send_from_directory, render_template, jsonify, request
+from flask_cors import CORS
 from keras.models import load_model
+from random import randint
 app = Flask(__name__,
-            static_folder='ciml-client/dist/static',
-            template_folder='ciml-client/dist')
+            static_folder='ciml-client/build/static',
+            template_folder='ciml-client/build')
+CORS(app)
+
+def get_input_from_args(args):
+    side = 1.0 if args.get('side') == "Buy" else 0.0
+    return_t5 = float(args.get('return_t5'))
+    return_t30 = float(args.get('return_t30'))
+    vol_sh_out_pct = float(args.get('vol_sh_out_pct'))
+    stake_pct_chg = float(args.get('stake_pct_chg'))
+    tran_value = float(args.get('tran_value'))
+    mkt_cap = float(args.get('mkt_cap'))
+    prev_tran_num = float(args.get('prev_tran_num'))
+    hit_rate_5d = float(args.get('hit_rate_5d'))
+    hit_rate_30d = float(args.get('hit_rate_30d'))
+    hit_rate_90d = float(args.get('hit_rate_90d'))
+    return np.array([[side, return_t5, return_t30, vol_sh_out_pct, stake_pct_chg, tran_value, mkt_cap,
+                prev_tran_num, hit_rate_5d, hit_rate_30d, hit_rate_90d]])
 
 
 @app.route('/')
 def hello_world():
     return render_template('index.html')
 
+@app.route('/svm')
+def support_vector_machine():
+    kernal = request.args.get("kernal")
 
-@app.route('/nn')
+    X_test, X_train, y_test_30d, y_test_5d, y_test_90d, y_train_30d, y_train_5d, y_train_90d = get_data()
+
+    from sklearn.svm import SVC
+    clf = SVC(kernel=kernal)
+    clf.fit(X_train, y_train_5d)
+    res = clf.predict(get_input_from_args(request.args))
+
+    return jsonify(result='Y' if res[0] > 0.5 else 'N')
+
+@app.route('/dnn')
 def neural_network():
     model = load_model('NeuralNetwork_5d_scale3_2HiddenLayer.h5')
     X_test, X_train, y_test_30d, y_test_5d, y_test_90d, y_train_30d, y_train_5d, y_train_90d = get_data(
         negative_label_as_zero=True)
-    scores = model.evaluate(X_train, y_train_5d)
-    res = ""
-    res += "[Train] %s: %.2f%%" % (model.metrics_names[1], scores[1] * 100)
+    # scores = model.evaluate(X_train, y_train_5d)
+    # res = ""
+    # res += "[Train] %s: %.2f%%" % (model.metrics_names[1], scores[1] * 100)
 
-    scores = model.evaluate(X_test, y_test_5d)
-    res += "[Test] %s: %.2f%%" % (model.metrics_names[1], scores[1] * 100)
-    return res
+    # scores = model.evaluate(X_test, y_test_5d)
+    # res += "[Test] %s: %.2f%%" % (model.metrics_names[1], scores[1] * 100)
+    res = model.predict(get_input_from_args(request.args))
+    return jsonify(result='Y' if res[0] > 0.5 else 'N')
 
 
 @app.route('/knn')
 def knn():
+    k = int(request.args.get("k"))
+
     X_test, X_train, y_test_30d, y_test_5d, y_test_90d, y_train_30d, y_train_5d, y_train_90d = get_data()
 
 
     ## Import the Classifier.
     from sklearn.neighbors import KNeighborsClassifier
     ## Instantiate the model with 5 neighbors.
-    knn = KNeighborsClassifier(n_neighbors=37)
+    # knn = KNeighborsClassifier(n_neighbors=37)
+    knn = KNeighborsClassifier(n_neighbors=k)
     ## Fit the model on the training data.
-    res = ""
+    # res = ""
     knn.fit(X_train, y_train_5d)
-    res += 'KNN score of 5d: {}'.format(round(knn.score(X_test, y_test_5d) * 100, 2))
-    knn.fit(X_train, y_train_30d)
-    res += 'KNN score of 30d: {}'.format(round(knn.score(X_test, y_test_30d) * 100, 2))
-    knn.fit(X_train, y_train_90d)
-    res += 'KNN score of 90d: {}'.format(round(knn.score(X_test, y_test_90d) * 100, 2))
-    return res
+    # res += 'KNN score of 5d: {}'.format(round(knn.score(X_test, y_test_5d) * 100, 2))
+    # knn.fit(X_train, y_train_30d)
+    # res += 'KNN score of 30d: {}'.format(round(knn.score(X_test, y_test_30d) * 100, 2))
+    # knn.fit(X_train, y_train_90d)
+    # res += 'KNN score of 90d: {}'.format(round(knn.score(X_test, y_test_90d) * 100, 2))
+    res = knn.predict(get_input_from_args(request.args))
+    return jsonify(result='Y' if res[0]>0.5 else 'N')
 
+@app.route('/random_data')
+def random_data():
+    X_test, X_train, y_test_30d, y_test_5d, y_test_90d, y_train_30d, y_train_5d, y_train_90d = get_data()
+    idx = randint(0, len(X_test)-1)
+    return jsonify(X_test.iloc[idx].to_dict())
 
 def get_data(negative_label_as_zero=False):
     import pandas as pd
