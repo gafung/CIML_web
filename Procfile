@@ -1,1 +1,1 @@
-web: gunicorn --timeout 60 ciml:app
+web: gunicorn --timeout 120 ciml:app
