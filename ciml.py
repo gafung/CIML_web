@@ -1,11 +1,13 @@
-from flask import Flask
+from flask import Flask, send_from_directory, render_template
 from keras.models import load_model
-app = Flask(__name__)
+app = Flask(__name__,
+            static_folder='ciml-client/dist/static',
+            template_folder='ciml-client/dist')
 
 
 @app.route('/')
 def hello_world():
-    return 'Hello World!'
+    return render_template('index.html')
 
 
 @app.route('/nn')
