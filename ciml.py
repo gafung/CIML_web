@@ -35,8 +35,19 @@ def support_vector_machine():
     X_test, X_train, y_test_30d, y_test_5d, y_test_90d, y_train_30d, y_train_5d, y_train_90d = get_data()
 
     from sklearn.svm import SVC
-    clf = SVC(kernel=kernal)
-    clf.fit(X_train, y_train_5d)
+    # clf = SVC(kernel=kernal)
+    # clf.fit(X_train, y_train_5d)
+
+    import pickle
+    # for krnl in ['linear', 'poly', 'sigmoid']:
+    #     clf = SVC(kernel=krnl)
+    #     clf.fit(X_train, y_train_5d)
+
+    #     pickle.dump(clf, open('SVM_{}.pickle'.format(krnl), "wb"))
+
+
+    clf = pickle.load(open('SVM_{}.pickle'.format(kernel), "rb"))
+
     res = clf.predict(get_input_from_args(request.args))
 
     return jsonify(result='Y' if res[0] > 0.5 else 'N')
