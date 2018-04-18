@@ -183,7 +183,7 @@ class App extends Component {
       <Option key={model} value={model}>{model}</Option>
     );
 
-    const forms = this.state.requestedModels.map((model, i)=>{
+    const forms = this.state.requestedModels.map((model)=>{
 
       let argFormItem;
       if(model["name"] === "KNN") {
@@ -204,7 +204,7 @@ class App extends Component {
 
       const removeModelButton = (this.state.requestedModels.length >= 2) ? <FormItem><Icon style={{cursor: "pointer"}} type="minus-circle-o" onClick={()=>this.removeModel(model["id"])}/></FormItem> : null;
         
-      return (<Form layout="inline" key={i}>
+      return (<Form layout="inline" key={model["id"]}>
         {removeModelButton}
         <FormItem label="Model">
           <Select defaultValue={model["name"]} onChange={this.createRequestedModelChangedHandler(model["id"], "name").bind(this)}>
