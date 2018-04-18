@@ -30,7 +30,7 @@ def hello_world():
 
 @app.route('/svm')
 def support_vector_machine():
-    kernal = request.args.get("kernal")
+    kernel = request.args.get("kernal")
 
     X_test, X_train, y_test_30d, y_test_5d, y_test_90d, y_train_30d, y_train_5d, y_train_90d = get_data()
 
